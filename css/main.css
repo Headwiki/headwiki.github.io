@@ -71,7 +71,7 @@ pre code {
 }
 
 .hyper-pageheader {
-    background: #ffc107;
+    background: #4608AD;
     color: #fff;
     margin-bottom: 4rem;
     padding: 4rem
@@ -108,7 +108,7 @@ pre code {
 
 .btn.btn-primary {
     border-color: #ffb300;
-    background-color: #ffc107
+    background-color: #4608AD
 }
 
 .btn.btn-primary:hover {
