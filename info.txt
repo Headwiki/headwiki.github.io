@@ -5,3 +5,6 @@ If var123 is sometype &T, then yes, &*var123 is equal to var123.
 The trick is when var123 isn't directly a reference, but something else which implements std::ops::Deref.
 For example, if var123 is &mut i32, then &*var123 gives you &i32. If var123 is String, &*var123 gives you &str (String implements Deref with Target = str).
 Here's a playground demonstrating this: https://play.rust-lang.org/?gist=e5fc35cd2ad006d4ffc5bbea65c504c5&version=stable
+
+Rust cheat sheet
+https://docs.google.com/presentation/d/1q-c7UAyrUlM-eZyTo1pd8SZ0qwA_wYxmPZVOQkoDmH4/mobilepresent#slide=id.p
