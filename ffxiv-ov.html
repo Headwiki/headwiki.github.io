@@ -1,0 +1,186 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>FFXIV Ocean Voyage Sheet</title>
+<meta name="description" content="">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<link rel="canonical" href="https://headwiki.github.io//">
+</head>
+  <body>
+		<select id="route" onchange="change()">
+			<option>Choose a route</option>
+		</select>
+		<select id="time" onchange="change()">
+			<option>Choose time</option>
+		</select>
+		<section id="result">
+		</section>
+  </body>
+  
+  <script>
+	var selectRoute = document.getElementById("route"); 
+	var selectTime = document.getElementById("time"); 
+	
+	var time = ["Day Sunset Night", "Sunset Night Day", "Night Day Sunset"];
+	
+	var routes = {
+		"Rothlyt Sound": ["The Cieldalaes", "Rhotano Sea", "Rothlyt Sound"],
+		"Northern Strait of Merlthor": ["Southern Merlthor", "Galadion Bay", "Northern Merlthor"],
+		"Rhotano Sea": ["Galadion Bay", "Southern Merlthor", "Rhotano Sea"],
+		"Bloodbrine Sea": ["The Cieldalaes", "Northern Merlthor", "Bloodbrine Sea"]
+	};
+	
+	var location_data = new Map();
+	location_data.set('Galadion Bay', 
+		{"baitToTrigger": "Plump Worm",
+			"spectral": {
+				"Day": {"bait": "Ragworm", 
+					"doubleHook": ["! tug at 8+ seconds (1776 max points)", "!! tug at 2 seconds (752 max points)"]}, 
+				"Sunset": {"bait": "Plump Worm",
+					"doubleHook": ["!! tug (1704 max points)", "!! tug at 2 or 6 seconds (852 max points)"]},
+				"Night": {"bait": "Krill",
+					"doubleHook": ["!! tug at 2 or 4 seconds (752 max points)", "Intuition buff: Glowworm (1000 max points)"]}
+	}});
+	location_data.set('Southern Merlthor', 
+		{"baitToTrigger": "Krill",
+			"spectral": {
+				"Day": {"bait": "Krill", 
+					"doubleHook": ["!! tug at 5-6 seconds (784 max points)", "Any fish after a Mooch (508 max points)"]}, 
+				"Sunset": {"bait": "Ragworm",
+					"doubleHook": ["! tug at 7+ seconds (1248 max points)", "Any fish after a Mooch (1380 max points)"]},
+				"Night": {"bait": "Plump Worm",
+					"doubleHook": ["Any fish after a Mooch (900 max points)", "Intuition buff: Shrimp Cage Feeder (1000 max points)"]}
+	}});
+	location_data.set('Northern Merlthor', 
+		{"baitToTrigger": "Ragworm",
+			"spectral": {
+				"Day": {"bait": "Plump Worm", 
+					"doubleHook": ["!!! tug (632 max points)", "Intuition Buff: Heavy Steel Jig (1000 max points)"]}, 
+				"Sunset": {"bait": "Ragworm",
+					"doubleHook": ["! tug at 8+ seconds (1512 max points)", "!!! tug (632 max points)"]},
+				"Night": {"bait": "Krill",
+					"doubleHook": ["!! tug at 6+ seconds (1584 max points)", "!!! tug (632 max points)"]}
+	}});
+	location_data.set('Rothlyt Sound', 
+		{"baitToTrigger": "Plump Worm",
+			"spectral": {
+				"Day": {"bait": "Krill", 
+					"doubleHook": ["!! tug at 5 seconds (1872 max points)", "!! mooch at 6+ seconds (1000 max points)"]}, 
+				"Sunset": {"bait": "Krill",
+					"doubleHook": ["!! tug at 8 seconds (1860 max points)", "! mooch at 3-5 seconds (808 max points)"]},
+				"Night": {"bait": "Krill",
+					"doubleHook": ["!! tug at 5 seconds (1872 max points)", "!! tug at 8 seconds (1860 max points)"]}
+	}});
+	location_data.set('Rhotano Sea', 
+		{"baitToTrigger": "Plump Worm",
+			"spectral": {
+				"Day": {"bait": "Plump Worm", 
+					"doubleHook": ["!!! tug (1728 max points)", "!! tug at 6 seconds (864 max points)"]}, 
+				"Sunset": {"bait": "Ragworm",
+					"doubleHook": ["! tug at 4-6 seconds (712 max points)", "Intuition Buff: Rat Tail (1000 max points)"]},
+				"Night": {"bait": "Krill",
+					"doubleHook": ["! tug at 7+ seconds (1776 max points)", "! tug at 4-6 seconds (712 max points)"]}
+	}});
+	location_data.set('The Cieldalaes', 
+		{"baitToTrigger": "Ragworm",
+			"spectral": {
+				"Day": {"bait": "Krill", 
+					"doubleHook": ["!! tug at 6+ seconds (804 max points)", "!! tug at 2-3 seconds (672 max points)"]}, 
+				"Sunset": {"bait": "Plump Worm",
+					"doubleHook": ["!! tug at 7+ seconds (1132 max points)", "!! tug at 2-3 seconds (672 max points)"]},
+				"Night": {"bait": "Krill",
+					"doubleHook": ["!! tug at 2-3 seconds (672 max points)", "Intuition Buff: Squid Strip (1000 max points)"]}
+	}});
+	location_data.set('Bloodbrine Sea', 
+		{"baitToTrigger": "Krill",
+			"spectral": {
+				"Day": {"bait": "Ragworm", 
+					"doubleHook": ["! tug at 6+ seconds (2040 max points)", "Intuition Buff: Pill Bug (1000 max points)"]}, 
+				"Sunset": {"bait": "Plump Worm",
+					"doubleHook": ["!!! tug at 6+ seconds (1840 max points)", "!! tug at 2 seconds (616 max points)"]},
+				"Night": {"bait": "Krill",
+					"doubleHook": ["!! tug at 6+ seconds (816 max points)", "!! tug at 2 seconds (616 max points)"]}
+	}});
+	
+		
+
+// Populate route dropdown	
+
+for (const route in routes) {
+	var opt = route;
+    var el = document.createElement("option");
+    el.textContent = opt;
+    el.value = opt;
+    selectRoute.appendChild(el);
+}
+
+// Populate time dropdown
+for(var i = 0; i < time.length; i++) {
+    var opt = time[i];
+    var el = document.createElement("option");
+    el.textContent = opt;
+    el.value = opt;
+    selectTime.appendChild(el);
+}
+
+function change() {
+	var routeClicked = document.getElementById("route").value;
+	var timeClicked = document.getElementById("time").value;
+	var result = document.getElementById("result");
+	
+	if ((timeClicked != "Choose time") && (routeClicked != "Choose a route")) {
+	var elUl = document.createElement("ul");
+	var times = timeClicked.split(" ");
+	var count = 0;
+	
+	if (time[0] == "Sunset") { count = 1; }
+	if (time[0] == "Night") { count = 2; }
+	
+	for (const map in routes[routeClicked]) {
+			var elLi = document.createElement("li");
+			var elUlu = document.createElement("ul");
+			
+			var pMap = document.createElement("li");
+			var pBaitTrigger = document.createElement("li");
+			var pBaitSpectral = document.createElement("li");
+			var pTime = document.createElement("li");
+			var pMap = document.createElement("li");
+			var pHook = document.createElement("li");
+			
+			pMap.textContent = "Map: " + routes[routeClicked][map];
+			pTime.textContent = "Time: " + times[count];
+			pBaitTrigger.textContent = "Bait to trigger spectral event: " + location_data.get(routes[routeClicked][map])["baitToTrigger"];
+			pBaitSpectral.textContent = "Bait during spectral event: " + location_data.get(routes[routeClicked][map])["spectral"][times[count]]["bait"];
+			pHook.textContent = "Double Hook tips: " + location_data.get(routes[routeClicked][map])["spectral"][times[count]]["doubleHook"];		
+			
+			elUlu.appendChild(pMap);
+			elUlu.appendChild(pTime);
+			elUlu.appendChild(pBaitTrigger);
+			elUlu.appendChild(pBaitSpectral);
+			elUlu.appendChild(pHook);
+			elLi.appendChild(elUlu);
+			elUl.appendChild(elLi);
+			
+			count += 1;
+			count = count % 3;
+		}
+		result.innerHTML = elUl.innerHTML;
+	}
+}
+
+
+
+  
+  </script>
+</html>
+
